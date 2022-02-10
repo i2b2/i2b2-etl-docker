@@ -1,0 +1,142 @@
+version: '3.5'
+
+services:
+
+  i2b2c-web:
+    image:  i2b2/etl.i2b2c.org/i2b2c-web:${I2B2C_WEB_TAG}
+    container_name: i2b2c-web
+    ports:
+      - "80:80"
+      - "444:443"
+    command: /run-httpd.sh localhost
+    depends_on:
+      - i2b2-wildfly
+    networks:
+      - i2b2-net
+
+  i2b2-etl:
+        image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
+        environment:
+          - CRC_DB_HOST=${I2B2_DS_CRC_IP}
+          - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
+          - CRC_DB_USER=${I2B2_DS_CRC_USER}
+          - CRC_DB_PASS=${I2B2_DS_CRC_PASS}
+          - CRC_DB_NAME=${I2B2_DS_CRC_DB}
+          - CRC_DB_TYPE=${I2B2_DS_CRC_DB_TYPE}
+
+          - ONT_DB_HOST=${I2B2_DS_ONT_IP}
+          - ONT_DB_PORT=${I2B2_DS_ONT_PORT}
+          - ONT_DB_USER=${I2B2_DS_ONT_USER}
+          - ONT_DB_PASS=${I2B2_DS_ONT_PASS}
+          - ONT_DB_NAME=${I2B2_DS_ONT_DB}
+          - ONT_DB_TYPE=${I2B2_DS_ONT_DB_TYPE}
+            
+          - PM_DB_HOST=${I2B2_DS_PM_IP}
+          - PM_DB_PASS=${I2B2_DS_PM_PASS}
+          - PM_DB_USER=${I2B2_DS_PM_USER}
+          - PM_DB_PORT=${I2B2_DS_PM_PORT}
+          - PM_DB_NAME=${I2B2_DS_PM_DB}
+          - PM_DB_TYPE=${I2B2_DS_PM_DB_TYPE}
+
+          - HIVE_DB_HOST=${I2B2_DS_HIVE_IP}
+          - HIVE_DB_PORT=${I2B2_DS_HIVE_PORT}
+          - HIVE_DB_USER=${I2B2_DS_HIVE_USER}
+          - HIVE_DB_PASS=${I2B2_DS_HIVE_PASS}
+          - HIVE_DB_NAME=${I2B2_DS_HIVE_DB}
+          - HIVE_DB_TYPE=${I2B2_DS_HIVE_DB_TYPE}
+
+          - BCP_DELIMITER=${I2B2_DS_BCP_DELIMITER}
+          - DB_USER=${I2B2_DS_USER}
+          - DB_PASS=${I2B2_DS_PASSWORD}
+        container_name: i2b2-etl
+        stdin_open: true
+        tty: true
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./importdata:/usr/src/app/importdata
+ #           - ../etl-mssql.env:/usr/src/app/i2b2_cdi/loader/resources/etl-mssql.env
+        ports:
+            - 5000:5000
+        networks:
+            - i2b2-net
+        command: bash -c "
+            python -m i2b2_cdi project password -c etl-mssql.env --user demo --password $I2B2_ROOT_PASSWORD
+            && python -m i2b2_cdi project password -c etl-mssql.env --user i2b2 --password $I2B2_ROOT_PASSWORD
+            && python -m i2b2_cdi project upgrade -c etl-mssql.env
+            && python -m i2b2_cdi.loader.i2b2_cdi_app"
+        depends_on:
+            - i2b2c-web
+
+
+
+  i2b2-wildfly:
+    image: i2b2/i2b2-wildfly:${I2B2_WILDFLY_TAG}
+    container_name: i2b2-wildfly
+    environment:
+      - DS_TYPE=${I2B2_DS_TYPE}
+      - DS_IP=${I2B2_DS_IP}
+      - DS_PORT=${I2B2_DS_PORT}
+      - DS_PM_USER=${I2B2_DS_PM_USER}
+      - DS_WD_USER=${I2B2_DS_WD_USER}
+      - DS_HIVE_USER=${I2B2_DS_HIVE_USER}
+      - DS_PM_PASS=${I2B2_DS_PM_PASS}
+      - DS_WD_PASS=${I2B2_DS_WD_PASS}
+      - DS_HIVE_PASS=${I2B2_DS_HIVE_PASS}
+
+      - DS_CRC_IP=${I2B2_DS_CRC_IP}
+      - DS_CRC_PORT=${I2B2_DS_CRC_PORT}
+      - DS_CRC_USER=${I2B2_DS_CRC_USER}
+      - DS_CRC_PASS=${I2B2_DS_CRC_PASS}
+      - DS_CRC_DB=${I2B2_DS_CRC_DB}
+      
+      - DS_ONT_IP=${I2B2_DS_ONT_IP}
+      - DS_ONT_PORT=${I2B2_DS_ONT_PORT}
+      - DS_ONT_USER=${I2B2_DS_ONT_USER}
+      - DS_ONT_PASS=${I2B2_DS_ONT_PASS}
+      - DS_ONT_DB=${I2B2_DS_ONT_DB}
+     
+#    ports:
+#      - "8080:8080"
+    networks:
+      - i2b2-net
+    depends_on:
+      - i2b2-mssql
+
+
+
+  i2b2-mssql-vol-loader:
+    image: i2b2/i2b2-mssql-vol:${I2B2_MSSQL_TAG}
+    container_name: i2b2-mssql-vol-loader
+    volumes:
+      - i2b2-mssql-vol:/var/opt/mssql
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+
+  i2b2-mssql:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    container_name: i2b2-mssql
+#    ports:
+#      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${I2B2_MSSQL_SA_PASSWORD}
+    networks:
+      - i2b2-net
+    volumes:
+      - i2b2-mssql-vol:/var/opt/mssql
+    depends_on:
+      - i2b2-mssql-vol-loader
+
+
+
+
+networks:
+  i2b2-net:
+    name: i2b2-net
+    driver: bridge
+
+volumes:
+  i2b2-mssql-vol:
+    name: i2b2-mssql-vol
+

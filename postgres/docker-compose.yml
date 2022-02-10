@@ -1,0 +1,152 @@
+version: '3.5'
+services:
+
+  i2b2c-web:
+    image: i2b2/i2b2c-web:${I2B2_WEB_TAG} 
+    container_name: i2b2c-web
+    ports:
+      - "80:80"
+      - "444:443"
+    command: /run-httpd.sh localhost
+    depends_on:
+      - i2b2-wildfly
+    networks:
+      - i2b2-net
+  i2b2-etl:
+        image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
+        container_name: i2b2-etl
+          
+        environment:
+
+          - CRC_DB_HOST=${I2B2_DS_CRC_IP}
+          - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
+          - CRC_DB_USER=${I2B2_DS_CRC_USER}
+          - CRC_DB_PASS=${I2B2_DS_CRC_PASS}
+          - CRC_DB_NAME=${I2B2_DS_CRC_DB}
+          - CRC_DB_TYPE=${I2B2_DS_CRC_DB_TYPE}
+
+          - ONT_DB_HOST=${I2B2_DS_ONT_IP}
+          - ONT_DB_PORT=${I2B2_DS_ONT_PORT}
+          - ONT_DB_USER=${I2B2_DS_ONT_USER}
+          - ONT_DB_PASS=${I2B2_DS_ONT_PASS}
+          - ONT_DB_NAME=${I2B2_DS_ONT_DB}
+          - ONT_DB_TYPE=${I2B2_DS_ONT_DB_TYPE}
+            
+          - PM_DB_HOST=${I2B2_DS_PM_IP}
+          - PM_DB_PASS=${I2B2_DS_PM_PASS}
+          - PM_DB_USER=${I2B2_DS_PM_USER}
+          - PM_DB_PORT=${I2B2_DS_PM_PORT}
+          - PM_DB_NAME=${I2B2_DS_PM_DB}
+          - PM_DB_TYPE=${I2B2_DS_PM_DB_TYPE}
+
+          - HIVE_DB_HOST=${I2B2_DS_HIVE_IP}
+          - HIVE_DB_PORT=${I2B2_DS_HIVE_PORT}
+          - HIVE_DB_USER=${I2B2_DS_HIVE_USER}
+          - HIVE_DB_PASS=${I2B2_DS_HIVE_PASS}
+          - HIVE_DB_NAME=${I2B2_DS_HIVE_DB}
+          - HIVE_DB_TYPE=${I2B2_DS_HIVE_DB_TYPE}
+
+          - PG_DB_NAME=${I2B2_DS_PG_DB}
+
+          - BCP_DELIMITER=${I2B2_DS_BCP_DELIMITER}
+          - CSV_DELIMITER=${I2B2_DS_CSV_DELIMITER}
+
+          - DB_USER=${I2B2_DS_USER}
+          - DB_PASSWORD=${I2B2_DS_PASSWORD}
+
+        stdin_open: true
+        tty: true
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./importdata:/usr/src/app/importdata
+        ports:
+            - 5000:5000
+        networks:
+            - i2b2-net
+        command: bash -c " sleep ${I2B2_DB_TIMER} &&
+            python -m i2b2_cdi project password -c etl-pgsql.env --user demo --password $I2B2_ROOT_PASSWORD
+            && python -m i2b2_cdi project password -c etl-pgsql.env --user i2b2 --password $I2B2_ROOT_PASSWORD
+            && python -m i2b2_cdi project upgrade -c etl-pgsql.env
+            && python -m i2b2_cdi.loader.i2b2_cdi_app "
+        depends_on:
+            - i2b2c-web
+
+  i2b2-wildfly:
+    image: i2b2/i2b2-wildfly:${I2B2_WILDFLY_TAG}
+    container_name: i2b2-wildfly
+    environment:
+      - DS_TYPE=${I2B2_DS_TYPE}
+      - DS_IP=${I2B2_DS_IP}
+      - DS_PORT=${I2B2_DS_PORT}
+      
+      - DS_CRC_IP=${I2B2_DS_CRC_IP}
+      - DS_CRC_PORT=${I2B2_DS_CRC_PORT}
+      - DS_CRC_USER=${I2B2_DS_CRC_USER}
+      - DS_CRC_PASS=${I2B2_DS_CRC_PASS}
+      - DS_CRC_DB=${I2B2_DS_CRC_DB}
+      
+      - DS_ONT_IP=${I2B2_DS_ONT_IP}
+      - DS_ONT_PORT=${I2B2_DS_ONT_PORT}
+      - DS_ONT_USER=${I2B2_DS_ONT_USER}
+      - DS_ONT_PASS=${I2B2_DS_ONT_PASS}
+      - DS_ONT_DB=${I2B2_DS_ONT_DB}
+
+      - DS_PM_IP=${I2B2_DS_PM_IP}
+      - DS_PM_PORT=${I2B2_DS_PM_PORT}
+      - DS_PM_USER=${I2B2_DS_PM_USER}
+      - DS_PM_PASS=${I2B2_DS_PM_PASS}
+      - DS_PM_DB=${I2B2_DS_PM_DB}
+
+      - DS_HIVE_IP=${I2B2_DS_HIVE_IP}
+      - DS_HIVE_PORT=${I2B2_DS_HIVE_PORT}
+      - DS_HIVE_USER=${I2B2_DS_HIVE_USER}
+      - DS_HIVE_PASS=${I2B2_DS_HIVE_PASS}
+      - DS_HIVE_DB=${I2B2_DS_HIVE_DB}
+
+      - DS_WD_IP=${I2B2_DS_WD_IP} #WD Db env not available
+      - DS_WD_PORT=${I2B2_DS_WD_PORT}
+      - DS_WD_USER=${I2B2_DS_WD_USER}
+      - DS_WD_PASS=${I2B2_DS_WD_PASS}
+      - DS_WD_DB=${I2B2_DS_WD_DB}
+     
+#    ports:
+#      - "8080:8080"
+#      - "9990:9990"
+    networks:
+      - i2b2-net
+    depends_on:
+     
+      - i2b2-pg
+
+  i2b2-pg-vol-loader:
+    image: i2b2/i2b2-pg-vol:${I2B2_PG_TAG}
+    container_name: i2b2-pg-vol-loader
+    volumes:
+      - i2b2-pg-vol:/var/lib/postgresql/data
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+
+  i2b2-pg:
+    image: postgres:12
+    container_name: i2b2-pg
+#    ports:
+#      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=${I2B2_PG_PASS}
+    networks:
+      - i2b2-net
+    volumes:
+      - i2b2-pg-vol:/var/lib/postgresql/data
+    depends_on:
+      - i2b2-pg-vol-loader
+  
+
+networks:
+  i2b2-net:
+    name: i2b2-net
+    driver: bridge
+volumes:
+  i2b2-pg-vol:
+    name: i2b2-pg-vol
+
