@@ -4,6 +4,7 @@ services:
   i2b2c-web:
     image: i2b2/i2b2c-web:${I2B2_WEB_TAG} 
     container_name: i2b2c-web
+    restart: always
     ports:
       - "80:80"
       - "444:443"
@@ -15,7 +16,7 @@ services:
   i2b2-etl:
         image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
         container_name: i2b2-etl
-          
+        restart: always
         environment:
 
           - CRC_DB_HOST=${I2B2_DS_CRC_IP}
@@ -74,6 +75,7 @@ services:
   i2b2-wildfly:
     image: i2b2/i2b2-wildfly:${I2B2_WILDFLY_TAG}
     container_name: i2b2-wildfly
+    restart: always
     environment:
       - DS_TYPE=${I2B2_DS_TYPE}
       - DS_IP=${I2B2_DS_IP}
@@ -130,6 +132,7 @@ services:
   i2b2-pg:
     image: postgres:12
     container_name: i2b2-pg
+    restart: always
 #    ports:
 #      - "5432:5432"
     environment:
