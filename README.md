@@ -1,7 +1,7 @@
 # i2b2-etl-docker
 Quick Start for i2B2-etl using docker compose
 
-## steps
+## install steps
     1. git clone https://github.com/i2b2/i2b2-etl-docker
     2. cd i2b2-etl-docker/postgres
     3. docker-compose up -d 
