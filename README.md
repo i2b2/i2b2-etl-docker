@@ -1,5 +1,7 @@
 # i2b2-etl-docker
-Quick Start for i2B2-etl using docker compose
+Quick Start for i2B2-etl using docker-compose
+
+[Prequiste docker-compose on linux machine](prerequisites.md) 
 
 ## install steps
     1. git clone https://github.com/i2b2/i2b2-etl-docker
