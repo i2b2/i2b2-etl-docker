@@ -12,12 +12,11 @@ services:
       - i2b2-wildfly
     networks:
       - i2b2-net
+
   i2b2-etl:
         image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
         container_name: i2b2-etl
-          
         environment:
-
           - CRC_DB_HOST=${I2B2_DS_CRC_IP}
           - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
           - CRC_DB_USER=${I2B2_DS_CRC_USER}
@@ -103,19 +102,15 @@ services:
       - DS_HIVE_PASS=${I2B2_DS_HIVE_PASS}
       - DS_HIVE_DB=${I2B2_DS_HIVE_DB}
 
-      - DS_WD_IP=${I2B2_DS_WD_IP} #WD Db env not available
+      - DS_WD_IP=${I2B2_DS_WD_IP}
       - DS_WD_PORT=${I2B2_DS_WD_PORT}
       - DS_WD_USER=${I2B2_DS_WD_USER}
       - DS_WD_PASS=${I2B2_DS_WD_PASS}
       - DS_WD_DB=${I2B2_DS_WD_DB}
-     
-#    ports:
-#      - "8080:8080"
-#      - "9990:9990"
+
     networks:
       - i2b2-net
     depends_on:
-     
       - i2b2-pg
 
   i2b2-pg-vol-loader:
@@ -130,8 +125,6 @@ services:
   i2b2-pg:
     image: postgres:12
     container_name: i2b2-pg
-#    ports:
-#      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=${I2B2_PG_PASS}
     networks:
@@ -142,6 +135,138 @@ services:
       - i2b2-pg-vol-loader
   
 
+  gitlab:
+    image: gitlab/gitlab-ce:14.10.5-ce.0 
+    hostname: gitlab
+    container_name: gitlab
+    restart: unless-stopped
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        gitlab_rails['gitlab_shell_ssh_port'] = 8822
+        gitlab_rails['initial_root_password'] = 'adminadmin'
+    depends_on:
+      - gitlab-etc-vol-loader 
+      - gitlab-var-vol-loader
+    volumes:   
+      - gitlab-vol-etc:/etc/gitlab
+      - gitlab-vol-var:/var/opt/gitlab
+    ports:
+      - "8090:80"
+      - "8822:22"
+    networks:
+      - i2b2-net
+      
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:v15.1.1   
+    restart: always
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+      - gitlab-runner-etc-vol-loader
+    container_name: gitlab-runner
+    volumes:
+      - gitlab-runner-vol-etc:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - i2b2-net
+
+  gitlab-etc-vol-loader:
+    image: i2b2/gitlab-etc-vol:${I2B2_GITLAB_TAG}
+    container_name: gitlab-etc-vol-loader
+    volumes:
+      - gitlab-vol-etc:/etc/gitlab
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+  
+  gitlab-var-vol-loader:
+    image: i2b2/gitlab-var-vol:${I2B2_GITLAB_TAG}
+    container_name: gitlab-var-vol-loader
+    volumes:
+      - gitlab-vol-var:/var/opt/gitlab
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+  
+  gitlab-runner-etc-vol-loader:
+    image: i2b2/gitlab-runner-etc-vol:${I2B2_GITLAB_RUNNER_TAG}
+    container_name: gitlab-runner-etc-vol-loader
+    volumes:
+      - gitlab-runner-vol-etc:/etc/gitlab-runner
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+
+
+
+  ibmdb2:
+    image: ibmcom/db2:11.5.7.0a
+    container_name: ibmdb2    
+    privileged: true
+    ports:
+      - 50000:50000
+    environment:
+      DB2INST1_PASSWORD: ibmdb2pass
+      LICENSE: accept
+      DBNAME: testdb
+    depends_on:
+      - ibmdb2-db-vol-loader
+      - ibmdb2-var-vol-loader
+    volumes:
+      - ibmdb2-db-vol:/database
+      - ibmdb2-var-vol:/var
+    networks:
+      - i2b2-net
+
+
+  ibmdb2-db-vol-loader:
+    image: i2b2/ibmdb2-db-vol:${I2B2_GITLAB_IBMDB2_TAG}
+    container_name: ibmdb2-db-vol-loader
+    volumes:
+      - ibmdb2-db-vol:/database
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net  
+  
+  
+  ibmdb2-var-vol-loader:
+    image: i2b2/ibmdb2-var-vol:${I2B2_GITLAB_IBMDB2_TAG}
+    container_name: ibmdb2-var-vol-loader
+    volumes:
+      - ibmdb2-var-vol:/var
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net      
+
+  
+
+  i2b2-mssql:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    restart: always
+    container_name: i2b2-mssql
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${I2B2_MSSQL_SA_PASSWORD}
+    networks:
+      - i2b2-net
+    volumes:
+      - i2b2-mssql-vol-osr:/var/opt/mssql
+    depends_on:
+      - i2b2-mssql-vol-osr
+  
+  i2b2-mssql-vol-osr:
+    image: i2b2/i2b2-mssql-vol-gitlab-source:${I2B2_GITLAB_MSSQL_SOURCE}
+    container_name: i2b2-mssql-vol-osr
+    volumes:
+      - i2b2-mssql-vol-osr:/var/opt/mssql
+    entrypoint: /bin/sh
+    networks:
+      - i2b2-net
+
+
 networks:
   i2b2-net:
     name: i2b2-net
@@ -149,4 +274,15 @@ networks:
 volumes:
   i2b2-pg-vol:
     name: i2b2-pg-vol
-
+  gitlab-vol-etc:
+    name: gitlab-vol-etc
+  gitlab-vol-var: 
+    name: gitlab-vol-var
+  gitlab-runner-vol-etc: 
+    name: gitlab-runner-vol-etc
+  i2b2-mssql-vol-osr:
+    name: i2b2-mssql-vol-osr     
+  ibmdb2-db-vol: 
+    name: ibmdb2-db-vol 
+  ibmdb2-var-vol:
+    name: ibmdb2-var-vol  
