@@ -12,12 +12,11 @@ services:
       - i2b2-wildfly
     networks:
       - i2b2-net
+
   i2b2-etl:
         image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
         container_name: i2b2-etl
-          
         environment:
-
           - CRC_DB_HOST=${I2B2_DS_CRC_IP}
           - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
           - CRC_DB_USER=${I2B2_DS_CRC_USER}
@@ -103,19 +102,15 @@ services:
       - DS_HIVE_PASS=${I2B2_DS_HIVE_PASS}
       - DS_HIVE_DB=${I2B2_DS_HIVE_DB}
 
-      - DS_WD_IP=${I2B2_DS_WD_IP} #WD Db env not available
+      - DS_WD_IP=${I2B2_DS_WD_IP}
       - DS_WD_PORT=${I2B2_DS_WD_PORT}
       - DS_WD_USER=${I2B2_DS_WD_USER}
       - DS_WD_PASS=${I2B2_DS_WD_PASS}
       - DS_WD_DB=${I2B2_DS_WD_DB}
-     
-#    ports:
-#      - "8080:8080"
-#      - "9990:9990"
+
     networks:
       - i2b2-net
     depends_on:
-     
       - i2b2-pg
 
   i2b2-pg-vol-loader:
@@ -130,8 +125,6 @@ services:
   i2b2-pg:
     image: postgres:12
     container_name: i2b2-pg
-#    ports:
-#      - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=${I2B2_PG_PASS}
     networks:
@@ -208,7 +201,7 @@ services:
 
 
   ibmdb2:
-    image: i2b2/ibmdb2:{I2B2_GITLAB_IBMDB2_TAG} #ibmcom/db2 #
+    image: ibmcom/db2:11.5.7.0a
     container_name: ibmdb2    
     privileged: true
     ports:
@@ -217,7 +210,6 @@ services:
       DB2INST1_PASSWORD: ibmdb2pass
       LICENSE: accept
       DBNAME: testdb
-    # command: db2start
     depends_on:
       - ibmdb2-db-vol-loader
       - ibmdb2-var-vol-loader
@@ -229,7 +221,7 @@ services:
 
 
   ibmdb2-db-vol-loader:
-    image: i2b2/ibmdb2-db-vol:{I2B2_GITLAB_IBMDB2_TAG}
+    image: i2b2/ibmdb2-db-vol:${I2B2_GITLAB_IBMDB2_TAG}
     container_name: ibmdb2-db-vol-loader
     volumes:
       - ibmdb2-db-vol:/database
@@ -239,7 +231,7 @@ services:
   
   
   ibmdb2-var-vol-loader:
-    image: i2b2/ibmdb2-var-vol:{I2B2_GITLAB_IBMDB2_TAG}
+    image: i2b2/ibmdb2-var-vol:${I2B2_GITLAB_IBMDB2_TAG}
     container_name: ibmdb2-var-vol-loader
     volumes:
       - ibmdb2-var-vol:/var
@@ -266,7 +258,7 @@ services:
       - i2b2-mssql-vol-osr
   
   i2b2-mssql-vol-osr:
-    image: i2b2/i2b2-mssql-vol-gitlab-source:{I2B2_GITLAB_MSSQL_SOURCE}
+    image: i2b2/i2b2-mssql-vol-gitlab-source:${I2B2_GITLAB_MSSQL_SOURCE}
     container_name: i2b2-mssql-vol-osr
     volumes:
       - i2b2-mssql-vol-osr:/var/opt/mssql
@@ -294,5 +286,3 @@ volumes:
     name: ibmdb2-db-vol 
   ibmdb2-var-vol:
     name: ibmdb2-var-vol  
-
-
