@@ -8,7 +8,7 @@ Quick Start for i2B2-etl using docker-compose
 ## install steps
     1. git clone https://github.com/i2b2/i2b2-etl-docker
     2. cd i2b2-etl-docker/postgres
-    3. docker-compose up -d 
+    3. docker-compose up -d i2b2-etl
     4. verify that webclient is working on http://localhost/webclient (username: demo ,pass: Etl@2021)
     
 ## to connect to diffirent data sources for the i2b2 cells
