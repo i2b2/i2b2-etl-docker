@@ -4,6 +4,7 @@ services:
   i2b2c-web:
     image: i2b2/i2b2c-web:${I2B2_WEB_TAG} 
     container_name: i2b2c-web
+    restart: unless-stopped
     ports:
       - "80:80"
       - "444:443"
@@ -16,6 +17,7 @@ services:
   i2b2-etl:
         image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
         container_name: i2b2-etl
+        restart: unless-stopped
         environment:
           - CRC_DB_HOST=${I2B2_DS_CRC_IP}
           - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
@@ -55,6 +57,7 @@ services:
 
         stdin_open: true
         tty: true
+        
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./importdata:/usr/src/app/importdata
@@ -125,6 +128,7 @@ services:
   i2b2-pg:
     image: postgres:12
     container_name: i2b2-pg
+    restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD=${I2B2_PG_PASS}
     networks:
