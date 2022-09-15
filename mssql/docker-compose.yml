@@ -3,7 +3,7 @@ version: '3.5'
 services:
 
   i2b2c-web:
-    image:  i2b2/etl.i2b2c.org/i2b2c-web:${I2B2C_WEB_TAG}
+    image:  i2b2/i2b2c-web:${I2B2C_WEB_TAG}
     container_name: i2b2c-web
     ports:
       - "80:80"
