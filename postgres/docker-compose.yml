@@ -53,7 +53,7 @@ services:
           - CSV_DELIMITER=${I2B2_DS_CSV_DELIMITER}
 
           - DB_USER=${I2B2_DS_USER}
-          - DB_PASSWORD=${I2B2_DS_PASSWORD}
+          - DB_PASS=${I2B2_DS_PASSWORD}
 
         stdin_open: true
         tty: true
