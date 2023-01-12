@@ -4,6 +4,7 @@ services:
 
   i2b2c-web:
     image:  i2b2/i2b2c-web:${I2B2_WEB_TAG}
+
     container_name: i2b2c-web
     ports:
       - "80:80"
