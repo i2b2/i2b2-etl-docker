@@ -3,7 +3,8 @@ version: '3.5'
 services:
 
   i2b2c-web:
-    image:  i2b2/i2b2c-web:${I2B2C_WEB_TAG}
+    image:  i2b2/i2b2c-web:${I2B2_WEB_TAG}
+
     container_name: i2b2c-web
     ports:
       - "80:80"
@@ -128,7 +129,49 @@ services:
     depends_on:
       - i2b2-mssql-vol-loader
 
+  i2b2-job:
+    image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
+    environment:
+        - CRC_DB_HOST=${I2B2_DS_CRC_IP}
+        - CRC_DB_PORT=${I2B2_DS_CRC_PORT}
+        - CRC_DB_USER=${I2B2_DS_CRC_USER}
+        - CRC_DB_PASS=${I2B2_DS_CRC_PASS}
+        - CRC_DB_NAME=${I2B2_DS_CRC_DB}
+        - CRC_DB_TYPE=${I2B2_DS_CRC_DB_TYPE}
 
+        - ONT_DB_HOST=${I2B2_DS_ONT_IP}
+        - ONT_DB_PORT=${I2B2_DS_ONT_PORT}
+        - ONT_DB_USER=${I2B2_DS_ONT_USER}
+        - ONT_DB_PASS=${I2B2_DS_ONT_PASS}
+        - ONT_DB_NAME=${I2B2_DS_ONT_DB}
+        - ONT_DB_TYPE=${I2B2_DS_ONT_DB_TYPE}
+            
+        - PM_DB_HOST=${I2B2_DS_PM_IP}
+        - PM_DB_PASS=${I2B2_DS_PM_PASS}
+        - PM_DB_USER=${I2B2_DS_PM_USER}
+        - PM_DB_PORT=${I2B2_DS_PM_PORT}
+        - PM_DB_NAME=${I2B2_DS_PM_DB}
+        - PM_DB_TYPE=${I2B2_DS_PM_DB_TYPE}
+
+        - HIVE_DB_HOST=${I2B2_DS_HIVE_IP}
+        - HIVE_DB_PORT=${I2B2_DS_HIVE_PORT}
+        - HIVE_DB_USER=${I2B2_DS_HIVE_USER}
+        - HIVE_DB_PASS=${I2B2_DS_HIVE_PASS}
+        - HIVE_DB_NAME=${I2B2_DS_HIVE_DB}
+        - HIVE_DB_TYPE=${I2B2_DS_HIVE_DB_TYPE}
+
+        - BCP_DELIMITER=${I2B2_DS_BCP_DELIMITER}
+        - DB_USER=${I2B2_DS_USER}
+        - DB_PASS=${I2B2_DS_PASSWORD}
+    container_name: i2b2-job
+    stdin_open: true
+    tty: true
+    networks:
+      - i2b2-net
+    command: bash -c "
+            python -m i2b2_cdi.derived_fact.schedule"
+    depends_on:
+      - i2b2-etl
 
 
 networks:
