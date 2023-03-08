@@ -6,7 +6,8 @@ sudo apt-get install -y ca-certificates curl gnupg lsb-release
 sudo rm /etc/apt/keyrings/docker.gpg
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | 
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update -y -d
 sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 sleep 3
@@ -50,3 +51,4 @@ sudo -s <<EOF
 EOF
 rm -rf ~/.$nonRootUser.pem
 echo "$(tput setab 2)$(tput setaf 0)Docker rootless successfully installed. On user dev2$(tput sgr 0)"
+`
