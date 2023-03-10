@@ -52,4 +52,6 @@ sudo -s <<EOF
     "
 EOF
 rm -rf ~/.$nonRootUser.pem
-echo "$(tput setab 2)$(tput setaf 0)Docker rootless successfully installed. On user dev2$(tput sgr 0)"
+echo "$(tput setab 2)$(tput setaf 0)Docker rootless successfully installed. On user dev2....Rebooting...$(tput sgr 0)"
+echo "$(tput setab 2)$(tput setaf 0) Login as root, and run sudo su - dev2 ..t o run docker commands $(tput sgr 0)"
+
