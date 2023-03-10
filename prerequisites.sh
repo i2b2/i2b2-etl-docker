@@ -6,4 +6,5 @@ sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-
 sudo chmod +x /usr/local/bin/docker-compose
 sudo usermod -aG docker $USER
 newgrp docker
+logout
 ### Log out and log back in so that your group membership is re-evaluated.(reboot linux machine)
