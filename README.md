@@ -25,3 +25,6 @@ Quick Start for i2B2-etl using docker-compose
     change I2B2_ROOT_PASSWORD in .env file, and run 'docker volume rm -f i2b2-mssql-vol i2b2pg-vol' before step 3
 
 For assistance email: support@i2b2clinical.org
+
+##  How to Cite
+Wagholikar KB, Ainsworth L, Zelle D, et.al. I2b2-etl: Python application for importing electronic health data into the informatics for integrating biology and the bedside platform. **Bioinformatics**. 2022 Oct 14;38(20):4833-4836. 
