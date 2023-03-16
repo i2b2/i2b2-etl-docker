@@ -28,3 +28,5 @@ For assistance email: support@i2b2clinical.org
 
 ##  How to Cite
 Wagholikar KB, Ainsworth L, Zelle D, et.al. I2b2-etl: Python application for importing electronic health data into the informatics for integrating biology and the bedside platform. **Bioinformatics**. 2022 Oct 14;38(20):4833-4836. 
+
+Wagholikar KB, Dessai P, Sanz J, Mendis ME, Bell DS, Murphy SN. Implementation of informatics for integrating biology and the bedside (i2b2) platform as Docker containers. **BMC Med Inform Decis Mak**. 2018 Jul 16;18(1):66. 
