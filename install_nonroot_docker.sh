@@ -1,4 +1,6 @@
 ### steps for execution by root on ubuntu 20.04
+
+sudo apt-get update
 sudo apt install systemd-container -y
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update -y
@@ -41,7 +43,7 @@ sudo -s <<EOF
         curl -fsSL https://get.docker.com/rootless | sh
         wait
         echo 'PATH=/usr/bin:$PATH' | tee --append  ~/.bashrc
-        echo 'DOCKER_HOST = unix:///run/user/'$(id -u)'/docker.sock' | tee --append  ~/.bashrc
+        echo 'DOCKER_HOST=unix:///run/user/'$(id -u)'/docker.sock' | tee --append  ~/.bashrc
         systemctl --user start docker
         systemctl --user enable docker
         loginctl enable-linger $nonRootUser
@@ -50,5 +52,6 @@ sudo -s <<EOF
     "
 EOF
 rm -rf ~/.$nonRootUser.pem
-echo "$(tput setab 2)$(tput setaf 0)Docker rootless successfully installed. On user dev2$(tput sgr 0)"
-`
+echo "$(tput setab 2)$(tput setaf 0)Docker rootless successfully installed on user dev2....Rebooting...$(tput sgr 0)"
+echo "$(tput setab 2)$(tput setaf 0)Login as root, and run sudo su - dev2 ..to run docker commands $(tput sgr 0)"
+sudo shutdown -r now
