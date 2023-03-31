@@ -164,7 +164,6 @@ services:
 
   gitlab-runner:
     image: gitlab/gitlab-runner:v15.1.1   
-    restart: always
     restart: unless-stopped
     depends_on:
       - gitlab
