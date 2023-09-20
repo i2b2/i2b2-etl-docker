@@ -15,7 +15,7 @@ services:
       - i2b2-net
 
   i2b2-etl:
-        image:  i2b2/i2b2-etl:${I2B2_ETL_TAG}
+        image: i2b2/i2b2-etl:${I2B2_ETL_TAG}
         container_name: i2b2-etl
         restart: unless-stopped
         environment:
@@ -55,6 +55,12 @@ services:
           - DB_USER=${I2B2_DS_USER}
           - DB_PASS=${I2B2_DS_PASSWORD}
 
+          - INSTITUTION_NAME=${INSTITUTION_NAME}
+          - INSTITUTION_LOGO_URL=${INSTITUTION_LOGO_URL}
+          - I2B2_PM_SERVICE_URL=${I2B2_PM_SERVICE_URL}
+          
+          - MRN_HASH_SALT=${MRN_HASH_SALT}
+          - ENABLE_PATIENT_FACT=${ENABLE_PATIENT_FACT}
         stdin_open: true
         tty: true
         
