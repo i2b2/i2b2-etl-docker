@@ -26,6 +26,12 @@ Quick Start for i2B2-etl using docker-compose
 
 For assistance email: support@i2b2clinical.org
 
+## for upgrading to new version, clean up previous containers with following steps
+
+    docker rm  -f $(docker ps -a -q)
+    docker volume rm $(docker volume ls -q)
+
+
 ##  How to Cite
 Wagholikar KB, Ainsworth L, Zelle D, et.al. I2b2-etl: Python application for importing electronic health data into the informatics for integrating biology and the bedside platform. **Bioinformatics**. 2022 Oct 14;38(20):4833-4836. 
 
