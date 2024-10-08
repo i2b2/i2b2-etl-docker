@@ -1,4 +1,4 @@
-version: '3.5'
+
 
 services:
 
@@ -56,7 +56,9 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./importdata:/usr/src/app/importdata
+            - ./../../i2b2-etl/i2b2_cdi:/usr/src/app/i2b2_cdi
  #           - ../etl-mssql.env:/usr/src/app/i2b2_cdi/loader/resources/etl-mssql.env
+
         ports:
             - 5000:5000
         networks:
@@ -98,8 +100,8 @@ services:
       - DS_ONT_PASS=${I2B2_DS_ONT_PASS}
       - DS_ONT_DB=${I2B2_DS_ONT_DB}
      
-#    ports:
-#      - "8080:8080"
+    ports:
+      - "8080:8080"
     networks:
       - i2b2-net
     depends_on:
@@ -117,11 +119,12 @@ services:
       - i2b2-net
 
   i2b2-mssql:
-    image: mcr.microsoft.com/mssql/server:2017-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: i2b2-mssql
     restart: unless-stopped
-#    ports:
-#      - "1433:1433"
+    ports:
+      - "1433:1433"
+    user: root
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=${I2B2_MSSQL_SA_PASSWORD}
