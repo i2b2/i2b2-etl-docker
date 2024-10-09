@@ -61,13 +61,19 @@ services:
 
         ports:
             - 5000:5000
+            - 5001:5001
+            - 8889:8889
         networks:
             - i2b2-net
-        command: bash -c "
-            python -m i2b2_cdi project password -c etl-mssql.env --user demo --password $I2B2_ROOT_PASSWORD
-            && python -m i2b2_cdi project password -c etl-mssql.env --user i2b2 --password $I2B2_ROOT_PASSWORD
-            && python -m i2b2_cdi project upgrade -c etl-mssql.env
-            && python -m i2b2_cdi.loader.i2b2_cdi_app"
+        command: bash -c " 
+          python -m pip install jupyter && jupyter notebook --allow-root --port 8889 --no-browser"
+        #  pip3 install 
+        #    python -m http.server 5001"
+        #command1: bash -c "
+        #    python -m i2b2_cdi project password -c etl-mssql.env --user demo --password $I2B2_ROOT_PASSWORD
+        #    && python -m i2b2_cdi project password -c etl-mssql.env --user i2b2 --password $I2B2_ROOT_PASSWORD
+        #    && python -m i2b2_cdi project upgrade -c etl-mssql.env
+        #    && python -m i2b2_cdi.loader.i2b2_cdi_app"
         depends_on:
             - i2b2c-web
 
