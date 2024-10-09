@@ -64,10 +64,11 @@ services:
             - 5001:5001
             - 8889:8889
         networks:
-            - i2b2-net
-        command: bash -c " 
-          python -m pip install jupyter && jupyter notebook --allow-root --port 8889 --no-browser"
-        #  pip3 install 
+            - i2b2-net  
+        command: bash -c "
+          python -m pip install jupyter && 
+          jupyter notebook --no-browser  --allow-root --port 5001 --ip 0.0.0.0"
+        #command: bash -c "
         #    python -m http.server 5001"
         #command1: bash -c "
         #    python -m i2b2_cdi project password -c etl-mssql.env --user demo --password $I2B2_ROOT_PASSWORD
